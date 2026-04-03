@@ -34,7 +34,7 @@ def build_command(elf_path: str):
         "-s", SYMTABS_PATH,
         "-f", elf_path,
         "mod_xref",
-        "--vma",
+#        "--vma",
     ]
 
 
