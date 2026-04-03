@@ -10,6 +10,7 @@ from pathlib import Path
 # =========================
 # Configuration
 # =========================
+
 ZIP_PATH = os.getenv("ZIP_PATH", "rootkit-dataset.zip")
 VOLATILITY_SCRIPT = os.getenv("VOLATILITY_SCRIPT", "vol.py")
 PLUGIN_PATH = os.getenv("PLUGIN_PATH", "ModXRef")

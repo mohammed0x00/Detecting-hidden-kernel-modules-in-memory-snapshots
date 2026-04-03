@@ -10,6 +10,7 @@ from pathlib import Path
 # =========================
 # Configuration
 # =========================
+
 ZIP_PATH = os.getenv("ZIP_PATH", "rootkit-dataset.zip")
 VOLATILITY_SCRIPT = os.getenv("VOLATILITY_SCRIPT", "vol.py")
 PLUGIN_PATH = os.getenv("PLUGIN_PATH", "ModXRef")
@@ -92,7 +93,8 @@ def run_volatility(elf_path: str) -> subprocess.CompletedProcess:
     print(f"[+] Running: {' '.join(cmd)}")
     return subprocess.run(
         cmd,
-        capture_output=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
         text=True,
         encoding="utf-8",
         errors="replace",

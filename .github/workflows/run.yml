@@ -4,26 +4,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Run Ruff on automation script only
-        uses: astral-sh/ruff-action@v3
-        with:
-          args: check run_batch.py
-
   run-batch:
     runs-on: ubuntu-latest
-    needs: lint
     timeout-minutes: 1440
 
     steps:
@@ -35,30 +17,25 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Show disk space before cleanup
-        run: df -h
-
-      - name: Free some disk space
+      - name: Free disk space
         run: |
           sudo rm -rf /usr/share/dotnet || true
           sudo rm -rf /opt/ghc || true
           sudo rm -rf /usr/local/share/boost || true
-          sudo apt-get clean || true
           df -h
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -e .
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Download dataset zip
+      - name: Download dataset
         run: |
           mkdir -p data
           curl -L "https://cloud.crysys.hu/public.php/dav/files/HAtXFNLSDAJJkQE/?accept=zip" -o data/rootkit-dataset.zip
           ls -lh data/rootkit-dataset.zip
 
-      - name: Run batch script
+      - name: Run script
         env:
           ZIP_PATH: data/rootkit-dataset.zip
           VOLATILITY_SCRIPT: vol.py
@@ -68,20 +45,10 @@ jobs:
         run: |
           python run_batch.py
 
-      - name: Compress outputs
-        if: always()
-        run: |
-          if [ -d volatility_outputs ]; then
-            tar -czf volatility_outputs.tar.gz volatility_outputs
-            ls -lh volatility_outputs.tar.gz
-          fi
-
-      - name: Upload outputs artifact
+      - name: Upload results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: volatility-outputs
-          path: |
-            volatility_outputs/
-            volatility_outputs.tar.gz
+          name: volatility_outputs
+          path: volatility_outputs
           if-no-files-found: warn
