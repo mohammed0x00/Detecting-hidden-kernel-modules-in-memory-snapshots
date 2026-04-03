@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use this software, or the associated dataset, please cite it as below."
+authors:
+- family-names: "Nagy"
+  given-names: "Roland"
+  orcid: "https://orcid.org/0000-0003-2305-3271"
+title: "Detecting Hidden Kernel Modules in Memory Snapshots"
+date-released: 2025-04-13
+url: "https://github.com/CrySyS/ModXRef"
