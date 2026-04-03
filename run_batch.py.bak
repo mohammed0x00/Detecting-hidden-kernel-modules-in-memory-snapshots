@@ -10,7 +10,7 @@ from pathlib import Path
 # =========================
 # Configuration
 # =========================
-ZIP_PATH = r"rootkit-dataset.zip"
+ZIP_PATH = r"D:\\rootkit-dataset.zip"
 VOLATILITY_SCRIPT = r"vol.py"
 PLUGIN_PATH = r"ModXRef"
 SYMTABS_PATH = r"symtabs"
