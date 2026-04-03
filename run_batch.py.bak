@@ -10,11 +10,11 @@ from pathlib import Path
 # =========================
 # Configuration
 # =========================
-ZIP_PATH = r"D:\\rootkit-dataset.zip"
-VOLATILITY_SCRIPT = r"vol.py"
-PLUGIN_PATH = r"ModXRef"
-SYMTABS_PATH = r"symtabs"
-OUTPUT_DIR = r"volatility_outputs"
+ZIP_PATH = os.getenv("ZIP_PATH", "rootkit-dataset.zip")
+VOLATILITY_SCRIPT = os.getenv("VOLATILITY_SCRIPT", "vol.py")
+PLUGIN_PATH = os.getenv("PLUGIN_PATH", "ModXRef")
+SYMTABS_PATH = os.getenv("SYMTABS_PATH", "symtabs")
+OUTPUT_DIR = os.getenv("OUTPUT_DIR", "volatility_outputs")
 
 # Folders inside the ZIP to search
 TARGET_PREFIXES = [

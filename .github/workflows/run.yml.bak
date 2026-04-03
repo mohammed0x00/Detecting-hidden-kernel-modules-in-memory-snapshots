@@ -1,51 +1,69 @@
-name: build-pyinstaller
+name: Run ModXRef Batch
+
 on:
-  push:
-    branches:
-      - stable
-      - develop
-      - "release/**"
-  pull_request:
-    branches:
-      - stable
-      - "release/**"
   workflow_dispatch:
 
 jobs:
-  exe:
-    runs-on: windows-latest
-    strategy:
-      matrix:
-        python-version: ["3.11"]
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
+  run-batch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 1440
 
-      - name: Install dependencies
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Show disk space before cleanup
+        run: df -h
+
+      - name: Free some disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet || true
+          sudo rm -rf /opt/ghc || true
+          sudo rm -rf /usr/local/share/boost || true
+          sudo apt-get clean || true
+          df -h
+
+      - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pyinstaller
-          pip install -e .[full,cloud,arrow]
+          pip install -e .
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Pyinstall executable
+      - name: Download dataset zip
         run: |
-          pyinstaller --clean -y vol.spec
-          pyinstaller --clean -y volshell.spec
+          mkdir -p data
+          curl -L "https://cloud.crysys.hu/public.php/dav/files/HAtXFNLSDAJJkQE/?accept=zip" -o data/rootkit-dataset.zip
+          ls -lh data/rootkit-dataset.zip
 
-      - name: Move files
+      - name: Run batch script
+        env:
+          ZIP_PATH: data/rootkit-dataset.zip
+          VOLATILITY_SCRIPT: vol.py
+          PLUGIN_PATH: ModXRef
+          SYMTABS_PATH: symtabs
+          OUTPUT_DIR: volatility_outputs
         run: |
-          mv dist/vol.exe vol.exe
-          mv dist/volshell.exe volshell.exe
+          python run_batch.py
 
-      - name: Archive
+      - name: Compress outputs
+        if: always()
+        run: |
+          if [ -d volatility_outputs ]; then
+            tar -czf volatility_outputs.tar.gz volatility_outputs
+            ls -lh volatility_outputs.tar.gz
+          fi
+
+      - name: Upload outputs artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: volatility3-pyinstaller
+          name: volatility-outputs
           path: |
-            vol.exe
-            volshell.exe
-            README.md
-            LICENSE.txt
+            volatility_outputs/
+            volatility_outputs.tar.gz
+          if-no-files-found: warn
